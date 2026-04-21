@@ -32,23 +32,31 @@ def snapshot(
     deploy: dict[str, Any] = {}
     env: dict[str, Any] = {}
 
-    if "services" in all_sections:
+    # Hints depend on every other collector — force-collect them when hints are
+    # requested so the generator never draws conclusions from empty data.
+    needs_hints = "hints" in all_sections
+
+    if "services" in all_sections or needs_hints:
         services = collect_services()
+    if "services" in all_sections:
         result["services"] = services
 
-    if "git" in all_sections:
+    if "git" in all_sections or needs_hints:
         git = collect_git(scan_dirs)
+    if "git" in all_sections:
         result["git"] = git
 
-    if "deploy" in all_sections:
+    if "deploy" in all_sections or needs_hints:
         deploy = collect_deploy()
+    if "deploy" in all_sections:
         result["deploy"] = deploy
 
-    if "env" in all_sections:
+    if "env" in all_sections or needs_hints:
         env = collect_env(extra_env)
+    if "env" in all_sections:
         result["env"] = env
 
-    if "hints" in all_sections:
+    if needs_hints:
         result["hints"] = generate_hints(services, git, deploy, env)
 
     return result
