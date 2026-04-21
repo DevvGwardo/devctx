@@ -161,6 +161,8 @@ mcp_servers:
 
 The MCP server exposes a single tool — `get_dev_context` — that returns the same structured JSON as the CLI.
 
+**Note:** MCP subprocesses don't inherit interactive-shell environment variables. To ensure API keys and other secrets appear in the `env` section, put your exports in `~/.zshenv` (not `~/.zshrc`), or on macOS use `launchctl setenv VAR value` to persist them across login and non-login shells.
+
 ### In agent prompts
 
 Add to your `CLAUDE.md` or agent system prompt:

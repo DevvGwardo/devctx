@@ -4,7 +4,7 @@ import json
 from unittest.mock import patch, MagicMock
 from pathlib import Path
 
-from devctx.collectors.deploy import collect_deploy, _railway_projects, _digitalocean_status
+from devctx.collectors.deploy import collect_deploy, _railway_projects, _digitalocean_status, _is_ephemeral_path
 
 
 def test_collect_deploy_returns_dict():
@@ -52,3 +52,39 @@ def test_railway_projects_with_config(tmp_path):
             assert result is not None
             assert len(result["projects"]) == 1
             assert result["projects"][0]["name"] == "myapp"
+
+
+def test_ephemeral_path_filter():
+    assert _is_ephemeral_path("/private/tmp/railway") is True
+    assert _is_ephemeral_path("/tmp/myapp") is True
+    assert _is_ephemeral_path("/Volumes/Backup/myapp") is True
+
+
+def test_ephemeral_path_filter_allows_real_paths():
+    assert _is_ephemeral_path("/home/user/myapp") is False
+    assert _is_ephemeral_path("/Users/devgwardo/projects/myapp") is False
+    assert _is_ephemeral_path("/Users/user/myapp") is False
+
+
+def test_railway_projects_excludes_ephemeral(tmp_path):
+    railway_dir = tmp_path / ".railway"
+    railway_dir.mkdir()
+    config = {
+        "projects": {
+            "/home/user/real-app": {"name": "real-app", "projectId": "abc-123"},
+            "/private/tmp/ephemeral-app": {"name": "ephemeral", "projectId": "def-456"},
+            "/tmp/real-app2": {"name": "tmp-real", "projectId": "ghi-789"},
+            "/Volumes/Backup/mounted-app": {"name": "mounted", "projectId": "jkl-012"},
+        }
+    }
+    (railway_dir / "config.json").write_text(json.dumps(config))
+
+    with patch("devctx.collectors.deploy.Path.home", return_value=tmp_path):
+        with patch("devctx.collectors.deploy.shutil.which", return_value=None):
+            result = _railway_projects()
+            assert result is not None
+            paths = [p["path"] for p in result["projects"]]
+            assert "/home/user/real-app" in paths
+            assert "/private/tmp/ephemeral-app" not in paths
+            assert "/tmp/real-app2" not in paths
+            assert "/Volumes/Backup/mounted-app" not in paths

@@ -82,7 +82,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--scan-dir", action="append", dest="scan_dirs",
-        help="Directory to scan for git repos (repeatable, default: ~)",
+        help="Directory to scan for git repos (repeatable; auto-detects repo root or ~)",
     )
     parser.add_argument(
         "--check-env", action="append", dest="extra_env",

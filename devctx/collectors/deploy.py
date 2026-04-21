@@ -9,6 +9,15 @@ from pathlib import Path
 from typing import Any
 
 
+def _is_ephemeral_path(path: str) -> bool:
+    """Check if path is ephemeral or from a mount (tmp, /Volumes/)."""
+    if path.startswith("/private/tmp") or path.startswith("/tmp"):
+        return True
+    if "/Volumes/" in path:
+        return True
+    return False
+
+
 def _railway_projects() -> dict[str, Any] | None:
     config_path = Path.home() / ".railway" / "config.json"
     if not config_path.exists():
@@ -19,6 +28,8 @@ def _railway_projects() -> dict[str, Any] | None:
         projects = config.get("projects", {})
         project_list = []
         for path, proj in projects.items():
+            if _is_ephemeral_path(path):
+                continue
             entry: dict[str, Any] = {"path": path}
             if "name" in proj:
                 entry["name"] = proj["name"]

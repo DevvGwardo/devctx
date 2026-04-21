@@ -5,7 +5,6 @@ from devctx.collectors.hints import generate_hints
 
 def test_empty_inputs():
     hints = generate_hints({}, {}, {}, {})
-    # Should still generate default hints for missing services
     assert isinstance(hints, list)
     assert any("hermes" in h for h in hints)
     assert any("postgres" in h for h in hints)
@@ -52,3 +51,32 @@ def test_docker_hint():
     services = {"ports": {}, "docker": [{"name": "redis"}, {"name": "postgres"}]}
     hints = generate_hints(services, {}, {}, {})
     assert any("2 docker container(s)" in h for h in hints)
+
+
+def test_hints_cap_at_15():
+    git = {}
+    for i in range(20):
+        git[f"repo{i}"] = {"branch": "main", "ahead": 1, "behind": 0, "dirty": True, "changed_files": 1}
+
+    hints = generate_hints({}, git, {}, {})
+    full_hints = [h for h in hints if "more repo(s)" not in h]
+    assert len(full_hints) <= 15
+
+
+def test_hints_bucketing():
+    git = {}
+    for i in range(20):
+        git[f"repo{i}"] = {"branch": "main", "ahead": 1, "behind": 0, "dirty": True, "changed_files": 1}
+
+    hints = generate_hints({}, git, {}, {})
+    assert any("more repo(s)" in h for h in hints)
+
+
+def test_hints_priority_order():
+    git = {f"repo{i}": {"branch": "main", "ahead": 1, "behind": 1, "dirty": True, "changed_files": 1} for i in range(20)}
+    services = {"ports": {}}
+    hints = generate_hints(services, git, {}, {})
+
+    service_hint = [h for h in hints if "hermes" in h or "postgres" in h]
+    if service_hint:
+        assert hints[0] == service_hint[0] or "hermes" in hints[0] or "postgres" in hints[0]
