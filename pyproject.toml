@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "devctx"
+version = "0.1.0"
+description = "Project context snapshot for AI agents — one call, full picture"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "DevvGwardo" }]
+keywords = ["ai", "agents", "context-engineering", "mcp", "developer-tools"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+]
+
+[project.scripts]
+devctx = "devctx.cli:main"
+devctx-mcp = "devctx.mcp_server:main"
+
+[project.urls]
+Homepage = "https://github.com/DevvGwardo/devctx"
+Repository = "https://github.com/DevvGwardo/devctx"
+Issues = "https://github.com/DevvGwardo/devctx/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["devctx"]
