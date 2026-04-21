@@ -20,16 +20,23 @@ def _init_repo(path: Path, dirty: bool = False, commit_msg: str = "init"):
 
 
 def _init_repo_with_timestamp(path: Path, days_ago: int, dirty: bool = False):
-    """Create a repo with commit at a specific days_ago."""
+    """Create a repo with both author and committer date at a specific days_ago."""
+    import os as _os
+    from datetime import datetime, timedelta, timezone
     path.mkdir(parents=True, exist_ok=True)
     subprocess.run(["git", "init"], cwd=path, capture_output=True)
     subprocess.run(["git", "config", "user.email", "test@test.com"], cwd=path, capture_output=True)
     subprocess.run(["git", "config", "user.name", "Test"], cwd=path, capture_output=True)
     (path / "README.md").write_text("hello")
     subprocess.run(["git", "add", "."], cwd=path, capture_output=True)
+    dt = datetime.now(timezone.utc) - timedelta(days=days_ago)
+    iso = dt.strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    env = _os.environ.copy()
+    env["GIT_AUTHOR_DATE"] = iso
+    env["GIT_COMMITTER_DATE"] = iso
     subprocess.run(
-        ["git", "commit", "-m", "init", "--date", f"{days_ago} days ago"],
-        cwd=path, capture_output=True
+        ["git", "commit", "-m", "init"],
+        cwd=path, capture_output=True, env=env,
     )
     if dirty:
         (path / "dirty.txt").write_text("uncommitted")
@@ -129,26 +136,111 @@ def test_multi_repo_summary_over_10(tmp_path):
     assert len(result) - 1 == 10
 
 
-def test_multi_repo_summary_tracks_dirty_ahead_behind(tmp_path):
-    r1 = tmp_path / "repo1"
-    _init_repo(r1, dirty=True)
-    r2 = tmp_path / "repo2"
-    _init_repo(r2)
-    subprocess.run(["git", "checkout", "-b", "feature"], cwd=r2, capture_output=True)
-    subprocess.run(["git", "commit", "--allow-empty", "-m", "feat"], cwd=r2, capture_output=True)
-    subprocess.run(["git", "push", "-u", "origin", "feature"], cwd=r2, capture_output=True)
+def test_multi_repo_summary_tracks_dirty(tmp_path):
+    for i in range(11):
+        _init_repo_with_timestamp(tmp_path / f"repo{i:02d}", days_ago=i, dirty=(i >= 10))
 
-    repos = {"repo1": {"dirty": True, "ahead": 0, "behind": 0}, "repo2": {"dirty": False, "ahead": 1, "behind": 2}}
-    repo_items = list(repos.items())
-    sorted_repos = sorted(repo_items, key=lambda item: item[1].get("_last_commit_ts", 0), reverse=True)
+    result = collect_git(scan_dirs=[str(tmp_path)])
+    assert "_summary" in result
+    assert result["_summary"]["count"] == 1
+    assert result["_summary"]["dirty"] == 1
 
-    top_10 = dict(sorted_repos[:2])
-    remaining = sorted_repos[2:]
 
-    total_dirty = sum(1 for _, s in remaining if s.get("dirty"))
-    total_ahead = sum(s.get("ahead", 0) for _, s in remaining)
-    total_behind = sum(s.get("behind", 0) for _, s in remaining)
+def test_multi_repo_summary_tracks_ahead_behind(tmp_path):
+    # Build 11 repos total. The oldest (repo10) is a clone with real
+    # ahead+behind divergence from its upstream; the other 10 are
+    # throwaway repos with more recent commits so repo10 gets pushed
+    # into the _summary bucket.
+    bare = tmp_path / "origin.git"
+    subprocess.run(
+        ["git", "init", "--bare", "--initial-branch=main", str(bare)],
+        capture_output=True,
+    )
 
-    assert total_dirty >= 0
-    assert total_ahead >= 0
-    assert total_behind >= 0
+    # Seed origin with one commit from a scratch clone.
+    seed = tmp_path / "seed"
+    subprocess.run(["git", "clone", str(bare), str(seed)], capture_output=True)
+    subprocess.run(["git", "config", "user.email", "t@t.com"], cwd=seed, capture_output=True)
+    subprocess.run(["git", "config", "user.name", "t"], cwd=seed, capture_output=True)
+    subprocess.run(["git", "checkout", "-b", "main"], cwd=seed, capture_output=True)
+    (seed / "a").write_text("a")
+    subprocess.run(["git", "add", "."], cwd=seed, capture_output=True)
+    subprocess.run(["git", "commit", "-m", "seed"], cwd=seed, capture_output=True)
+    subprocess.run(["git", "push", "-u", "origin", "main"], cwd=seed, capture_output=True)
+
+    # Clone becomes repo10 — oldest (furthest back days_ago).
+    repo10 = tmp_path / "repo10"
+    subprocess.run(["git", "clone", str(bare), str(repo10)], capture_output=True)
+    subprocess.run(["git", "config", "user.email", "t@t.com"], cwd=repo10, capture_output=True)
+    subprocess.run(["git", "config", "user.name", "t"], cwd=repo10, capture_output=True)
+    # Add 2 local commits ahead.
+    for n in range(2):
+        (repo10 / f"local{n}").write_text("x")
+        subprocess.run(["git", "add", "."], cwd=repo10, capture_output=True)
+        subprocess.run(["git", "commit", "-m", f"local{n}"], cwd=repo10, capture_output=True)
+    # Push 3 commits to origin from seed (so repo10 is behind by 3).
+    for n in range(3):
+        (seed / f"upstream{n}").write_text("y")
+        subprocess.run(["git", "add", "."], cwd=seed, capture_output=True)
+        subprocess.run(["git", "commit", "-m", f"upstream{n}"], cwd=seed, capture_output=True)
+    subprocess.run(["git", "push"], cwd=seed, capture_output=True)
+    subprocess.run(["git", "fetch"], cwd=repo10, capture_output=True)
+
+    # 10 other repos — recent commits so they outrank repo10 in top-10.
+    for i in range(10):
+        _init_repo_with_timestamp(tmp_path / f"repo{i:02d}", days_ago=0)
+
+    # Clean up bare + seed so they don't count as repos in the scan.
+    import shutil as _sh
+    _sh.rmtree(bare)
+    _sh.rmtree(seed)
+
+    result = collect_git(scan_dirs=[str(tmp_path)])
+    assert "_summary" in result
+    assert result["_summary"]["count"] == 1
+    assert result["_summary"]["ahead"] == 2
+    assert result["_summary"]["behind"] == 3
+
+
+def test_last_commit_ts_stripped_single_repo_mode(tmp_path):
+    for i in range(3):
+        _init_repo(tmp_path / f"repo{i}")
+
+    result = collect_git(scan_dirs=[str(tmp_path)])
+    for name, state in result.items():
+        if name == "_summary":
+            continue
+        assert "_last_commit_ts" not in state
+
+
+def test_last_commit_ts_stripped_multi_repo_mode(tmp_path):
+    for i in range(12):
+        _init_repo_with_timestamp(tmp_path / f"repo{i:02d}", days_ago=i)
+
+    result = collect_git(scan_dirs=[str(tmp_path)])
+    for name, state in result.items():
+        if name == "_summary":
+            continue
+        assert "_last_commit_ts" not in state
+
+
+def test_find_git_root_handles_worktree_file(tmp_path, monkeypatch):
+    main_repo = tmp_path / "main"
+    _init_repo(main_repo)
+    worktree = tmp_path / "wt"
+    subprocess.run(
+        ["git", "worktree", "add", "-b", "wt-branch", str(worktree)],
+        cwd=main_repo, capture_output=True,
+    )
+    assert (worktree / ".git").is_file(), "worktree should have .git as a file"
+
+    monkeypatch.chdir(worktree)
+    root = _find_git_root()
+    assert root is not None
+    assert root == worktree
+
+
+def test_find_git_root_stops_at_filesystem_root(monkeypatch):
+    monkeypatch.chdir("/")
+    result = _find_git_root()
+    assert result is None

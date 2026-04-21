@@ -9,13 +9,16 @@ from pathlib import Path
 from typing import Any
 
 
+_TMP_PREFIXES = ("/private/tmp/", "/tmp/", "/var/folders/", "/private/var/folders/")
+
+
 def _is_ephemeral_path(path: str) -> bool:
-    """Check if path is ephemeral or from a mount (tmp, /Volumes/)."""
-    if path.startswith("/private/tmp") or path.startswith("/tmp"):
-        return True
-    if "/Volumes/" in path:
-        return True
-    return False
+    """Check if a Railway project path is ephemeral (temp directory only).
+
+    We do NOT filter /Volumes/*: users legitimately keep projects on
+    external drives. Filtered: POSIX /tmp and macOS /var/folders/*/T/.
+    """
+    return path.startswith(_TMP_PREFIXES)
 
 
 def _railway_projects() -> dict[str, Any] | None:

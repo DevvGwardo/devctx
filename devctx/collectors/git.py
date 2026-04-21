@@ -9,10 +9,10 @@ from typing import Any
 
 
 def _find_git_root() -> Path | None:
-    """Walk up from cwd to find the first .git directory."""
+    """Walk up from cwd to find the first .git entry (directory or worktree file)."""
     cwd = Path.cwd()
     for parent in [cwd] + list(cwd.parents):
-        if (parent / ".git").is_dir():
+        if (parent / ".git").exists():
             return parent
     return None
 

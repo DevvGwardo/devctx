@@ -57,13 +57,14 @@ def test_railway_projects_with_config(tmp_path):
 def test_ephemeral_path_filter():
     assert _is_ephemeral_path("/private/tmp/railway") is True
     assert _is_ephemeral_path("/tmp/myapp") is True
-    assert _is_ephemeral_path("/Volumes/Backup/myapp") is True
+    assert _is_ephemeral_path("/var/folders/ab/cd/T/pytest-1/x") is True
+    assert _is_ephemeral_path("/private/var/folders/ab/cd/T/pytest-1/x") is True
 
 
 def test_ephemeral_path_filter_allows_real_paths():
     assert _is_ephemeral_path("/home/user/myapp") is False
     assert _is_ephemeral_path("/Users/devgwardo/projects/myapp") is False
-    assert _is_ephemeral_path("/Users/user/myapp") is False
+    assert _is_ephemeral_path("/Volumes/T7 Shield/MyApp") is False
 
 
 def test_railway_projects_excludes_ephemeral(tmp_path):
@@ -74,7 +75,7 @@ def test_railway_projects_excludes_ephemeral(tmp_path):
             "/home/user/real-app": {"name": "real-app", "projectId": "abc-123"},
             "/private/tmp/ephemeral-app": {"name": "ephemeral", "projectId": "def-456"},
             "/tmp/real-app2": {"name": "tmp-real", "projectId": "ghi-789"},
-            "/Volumes/Backup/mounted-app": {"name": "mounted", "projectId": "jkl-012"},
+            "/Volumes/T7 Shield/real-mounted": {"name": "mounted-real", "projectId": "jkl-012"},
         }
     }
     (railway_dir / "config.json").write_text(json.dumps(config))
@@ -87,4 +88,4 @@ def test_railway_projects_excludes_ephemeral(tmp_path):
             assert "/home/user/real-app" in paths
             assert "/private/tmp/ephemeral-app" not in paths
             assert "/tmp/real-app2" not in paths
-            assert "/Volumes/Backup/mounted-app" not in paths
+            assert "/Volumes/T7 Shield/real-mounted" in paths
