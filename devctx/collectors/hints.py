@@ -22,10 +22,13 @@ def generate_hints(
         priority_hints.append((0, "postgres is not listening — check if the database is running"))
 
     for repo, state in git.items():
+        if repo == "_summary":
+            continue
+        branch = state.get("branch", "unknown")
         if state.get("behind", 0) > 0:
-            priority_hints.append((1, f"{repo} is {state['behind']} commit(s) behind upstream on {state['branch']}"))
+            priority_hints.append((1, f"{repo} is {state['behind']} commit(s) behind upstream on {branch}"))
         if state.get("ahead", 0) > 0:
-            priority_hints.append((2, f"{repo} has {state['ahead']} unpushed commit(s) on {state['branch']}"))
+            priority_hints.append((2, f"{repo} has {state['ahead']} unpushed commit(s) on {branch}"))
         if state.get("dirty"):
             n = state.get("changed_files", "some")
             priority_hints.append((3, f"{repo} has {n} uncommitted change(s)"))
