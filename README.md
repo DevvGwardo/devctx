@@ -1,5 +1,9 @@
 # devctx
 
+<p align="center">
+  <img src="docs/devctx-banner.png" alt="devctx banner" width="100%">
+</p>
+
 **One command. Full project context. For AI agents.**
 
 Stop your agents from burning tokens on discovery. `devctx` gives Claude Code, Hermes, and any AI agent a structured snapshot of your entire dev environment in a single call.
@@ -42,56 +46,9 @@ AI agents waste tokens discovering your environment through trial and error — 
 
 **devctx eliminates the discovery phase entirely.**
 
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#6366f1', 'primaryTextColor': '#f8fafc', 'lineColor': '#818cf8', 'secondaryColor': '#1e1b4b', 'tertiaryColor': '#312e81', 'background': '#0f172a', 'mainBkg': '#1e1b4b', 'nodeBorder': '#818cf8', 'clusterBkg': '#1e1b4b', 'edgeLabelBackground': '#1e1b4b', 'fontFamily': 'JetBrains Mono, monospace'}}}%%
-
-flowchart TB
-    subgraph BEFORE["<b>Without devctx</b> — N calls to orient"]
-        direction TB
-        A1([AI Agent]):::agent
-        A1 -->|"1. git status"| B1[git]:::tool
-        A1 -->|"2. docker ps"| B2[docker]:::tool
-        A1 -->|"3. lsof ports"| B3[ports]:::tool
-        A1 -->|"4. railway status"| B4[railway]:::tool
-        A1 -->|"5. check envs"| B5[env vars]:::tool
-        A1 -->|"6. more discovery..."| B6["...repeat"]:::tool
-
-        B1 -.->|"partial"| A1
-        B2 -.->|"partial"| A1
-        B3 -.->|"partial"| A1
-        B4 -.->|"partial"| A1
-        B5 -.->|"partial"| A1
-        B6 -.->|"partial"| A1
-    end
-
-    subgraph AFTER["<b>With devctx</b> — 1 call, full picture"]
-        direction TB
-        A2([AI Agent]):::agent
-        A2 ==>|"devctx"| CTX{devctx}:::devctx
-
-        CTX --> C1[Services]:::collector
-        CTX --> C2[Git State]:::collector
-        CTX --> C3[Deployments]:::collector
-        CTX --> C4[Env Health]:::collector
-        CTX --> C5["Hints"]:::collector
-
-        C1 --> OUT[/"Structured JSON\n~500 tokens"/]:::output
-        C2 --> OUT
-        C3 --> OUT
-        C4 --> OUT
-        C5 --> OUT
-        OUT ==> A2
-    end
-
-    classDef agent fill:#6366f1,stroke:#818cf8,color:#f8fafc,stroke-width:2px
-    classDef tool fill:#1e293b,stroke:#475569,color:#94a3b8,stroke-width:1px
-    classDef devctx fill:#6366f1,stroke:#a5b4fc,color:#f8fafc,stroke-width:3px
-    classDef collector fill:#312e81,stroke:#6366f1,color:#c7d2fe,stroke-width:1px
-    classDef output fill:#065f46,stroke:#34d399,color:#d1fae5,stroke-width:2px
-
-    style BEFORE fill:#0f172a,stroke:#ef4444,color:#fca5a5,stroke-width:2px
-    style AFTER fill:#0f172a,stroke:#22c55e,color:#86efac,stroke-width:2px
-```
+<p align="center">
+  <img src="docs/devctx-compare.png" alt="Without devctx vs With devctx" width="100%">
+</p>
 
 ### The math
 
@@ -176,37 +133,9 @@ Use the `hints` field to inform your approach before writing any code.
 
 ## Architecture
 
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#6366f1', 'primaryTextColor': '#f8fafc', 'lineColor': '#818cf8', 'secondaryColor': '#1e1b4b', 'tertiaryColor': '#312e81', 'background': '#0f172a', 'mainBkg': '#1e1b4b', 'nodeBorder': '#818cf8', 'fontFamily': 'JetBrains Mono, monospace'}}}%%
-
-flowchart LR
-    CLI["devctx CLI"]:::entry
-    MCP["devctx-mcp\n(stdio server)"]:::entry
-
-    CLI --> SNAP["snapshot()"]:::core
-    MCP --> SNAP
-
-    SNAP --> S["services\ncollector"]:::mod
-    SNAP --> G["git\ncollector"]:::mod
-    SNAP --> D["deploy\ncollector"]:::mod
-    SNAP --> E["env\ncollector"]:::mod
-    SNAP --> H["hints\ngenerator"]:::mod
-
-    S -->|"socket scan\nlsof\ndocker ps"| SYS["System"]:::ext
-    G -->|"git CLI"| SYS
-    D -->|"railway CLI\ndoctl CLI"| SYS
-    E -->|"os.environ"| SYS
-
-    S --> H
-    G --> H
-    D --> H
-    E --> H
-
-    classDef entry fill:#6366f1,stroke:#818cf8,color:#f8fafc,stroke-width:2px
-    classDef core fill:#312e81,stroke:#6366f1,color:#c7d2fe,stroke-width:2px
-    classDef mod fill:#1e293b,stroke:#475569,color:#94a3b8,stroke-width:1px
-    classDef ext fill:#065f46,stroke:#34d399,color:#d1fae5,stroke-width:1px
-```
+<p align="center">
+  <img src="docs/devctx-arch.png" alt="devctx architecture diagram" width="90%">
+</p>
 
 ### Collectors
 
