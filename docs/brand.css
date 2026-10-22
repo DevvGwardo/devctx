@@ -1,0 +1,19 @@
+:root {
+  color-scheme: light;
+  --mint: #edf3eb;
+  --forest: #153c35;
+  --lime: #d4ef76;
+  --sage: #526b5d;
+  --line: #bdcdbf;
+  --paper: #f8fbf5;
+  --body: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+  --mono: Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--mint); color: var(--forest); font-family: var(--body); }
+img { max-width: 100%; }
+a { color: var(--forest); text-underline-offset: 4px; }
+a:focus-visible { outline: 2px solid var(--forest); outline-offset: 5px; }
+.label { font-family: var(--mono); font-size: 11px; line-height: 1.7; letter-spacing: .06em; text-transform: uppercase; }
+::selection { background: var(--forest); color: var(--mint); }

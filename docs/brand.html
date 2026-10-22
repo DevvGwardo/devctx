@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>devctx · Visual guide</title>
+  <meta name="description" content="How devctx collects local development signals and returns structured context through a CLI or MCP tool.">
+  <link rel="icon" href="images/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="brand.css">
+  <style>
+    .page { width: min(1200px, calc(100% - 96px)); margin: 0 auto; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 28px 0; border-bottom: 1px solid var(--forest); }
+    .signature { display: flex; align-items: center; gap: 12px; color: var(--forest); text-decoration: none; }
+    .signature img { width: 32px; height: 32px; }
+    .signature strong { font-family: var(--mono); font-size: 27px; letter-spacing: -2px; }
+    nav { display: flex; gap: 24px; }
+    nav a { font-size: 12px; }
+    .intro { display: grid; grid-template-columns: 1.3fr 1fr; align-items: end; gap: 64px; padding: 60px 0 42px; }
+    .intro .label { color: var(--sage); }
+    h1 { font-size: clamp(42px, 6.5vw, 80px); line-height: 1.04; letter-spacing: -.055em; font-weight: 500; margin: 14px 0 0; }
+    h1 span { background: var(--lime); }
+    .intro p { color: var(--sage); font-size: 16px; line-height: 1.8; margin: 0; }
+    .hero { display: block; width: 100%; height: auto; border: 1px solid var(--line); }
+    .snapshot { margin-top: 24px; background: var(--forest); color: var(--mint); padding: 20px 24px; display: flex; justify-content: space-between; gap: 20px; align-items: center; }
+    .snapshot code { color: var(--lime); font-size: 15px; overflow-wrap: anywhere; }
+    .snapshot span { font-size: 12px; }
+    section { margin-top: 72px; scroll-margin-top: 24px; }
+    .section-heading { display: grid; grid-template-columns: 48px 1fr 1fr; align-items: baseline; gap: 20px; padding-top: 22px; border-top: 1px solid var(--forest); margin-bottom: 26px; }
+    .number { font-family: var(--mono); font-size: 13px; color: var(--sage); }
+    h2 { font-size: clamp(30px, 4vw, 44px); line-height: 1.1; letter-spacing: -.045em; font-weight: 500; margin: 0; }
+    .section-heading p { color: var(--sage); font-size: 14px; line-height: 1.8; margin: 0; }
+    figure { margin: 0; }
+    figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); }
+    figcaption { display: flex; justify-content: space-between; gap: 20px; margin-top: 14px; color: var(--sage); font-size: 12px; line-height: 1.7; }
+    .collectors { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; padding: 0; list-style: none; margin-top: 24px; }
+    .collectors li { border-bottom: 1px solid var(--line); padding: 16px 0; font-size: 14px; line-height: 1.8; color: var(--sage); }
+    .collectors strong { display: block; font-family: var(--mono); color: var(--forest); font-size: 14px; }
+    code { font-family: var(--mono); font-size: .9em; overflow-wrap: anywhere; }
+    .palette { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); }
+    .swatch { display: flex; flex-direction: column; justify-content: space-between; gap: 28px; padding: 24px; min-height: 150px; }
+    .swatch strong { font-size: 24px; font-weight: 500; }
+    .swatch span { font-family: var(--mono); font-size: 12px; }
+    .forest { background: var(--forest); color: var(--mint); }
+    .lime { background: var(--lime); color: var(--forest); }
+    .sage { background: var(--sage); color: var(--mint); }
+    .note { color: var(--sage); max-width: 760px; font-size: 14px; line-height: 1.8; margin-top: 24px; }
+    footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; margin-top: 72px; padding: 24px 0 36px; border-top: 1px solid var(--forest); color: var(--sage); font-size: 12px; line-height: 1.8; }
+    @media (max-width: 700px) {
+      .page { width: calc(100% - 40px); }
+      header { flex-wrap: wrap; gap: 18px; padding: 24px 0; }
+      nav { gap: 24px; flex-wrap: wrap; }
+      .intro { grid-template-columns: 1fr; gap: 24px; padding: 40px 0 30px; }
+      .intro p { font-size: 15px; }
+      .snapshot { flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px; }
+      section { margin-top: 48px; }
+      .section-heading { grid-template-columns: 24px 1fr; gap: 12px; }
+      .section-heading p { grid-column: 2; }
+      .collectors { grid-template-columns: 1fr; }
+      .palette { grid-template-columns: 1fr 1fr; }
+      .swatch { min-height: 140px; padding: 20px; }
+      figcaption { flex-direction: column; gap: 4px; }
+      footer { margin-top: 48px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <a class="signature" href="../README.md"><img src="images/mark.svg" alt=""><strong>devctx</strong></a>
+      <nav aria-label="Visual guide"><a href="#orientation">Orientation</a><a href="#architecture">Architecture</a><a href="#identity">Identity</a></nav>
+    </header>
+    <main>
+      <div class="intro">
+        <div><span class="label">Development context / CLI + MCP</span><h1>Context first.<br><span>Better decisions.</span></h1></div>
+        <p>Bring local development signals into one structured snapshot. Services, Git, deployment context, variable presence, and derived hints help an agent orient before it acts.</p>
+      </div>
+      <a href="devctx-banner.png" aria-label="Open the full-size devctx banner"><img class="hero" src="devctx-banner.png" width="1600" height="800" alt="devctx. Context first. Better decisions. A structured environment snapshot for AI agents, available through CLI and MCP."></a>
+      <div class="snapshot"><code>devctx --git --hints --scan-dir .</code><span>Scope the output to the task. Review the hints.</span></div>
+      <section id="orientation" aria-labelledby="orientation-title">
+        <div class="section-heading"><span class="number">01</span><h2 id="orientation-title">Orient once. Then build.</h2><p>Request context in one call instead of assembling each signal separately. The snapshot is a starting point, not a replacement for task-specific investigation.</p></div>
+        <figure>
+          <a href="devctx-compare.png" aria-label="Open the full-size orientation infographic"><img src="devctx-compare.png" width="1586" height="992" alt="Comparison of separate port, Git, deployment, and environment checks with one devctx snapshot containing services, git, deploy, env, and hints. This is illustrative, not a measured benchmark."></a>
+          <figcaption><span>Packaging context, not promising perfect knowledge.</span><a href="../README.md#usage">Choose the right sections</a></figcaption>
+        </figure>
+        <p class="note">Choose scan directories deliberately. The default Git scope is the current repository, or your home directory when no repository root is found. Requesting hints runs all four source collectors, even if only the hints field is returned.</p>
+      </section>
+      <section id="architecture" aria-labelledby="architecture-title">
+        <div class="section-heading"><span class="number">02</span><h2 id="architecture-title">Local signals. Shared context.</h2><p>Collectors feed <code>snapshot()</code>. Derived hints and requested fields return as JSON through the CLI or MCP tool.</p></div>
+        <figure>
+          <a href="devctx-arch.png" aria-label="Open the full-size architecture infographic"><img src="devctx-arch.png" width="1586" height="992" alt="Services, Git, deployment, and environment-presence collectors feed snapshot and derived hints. Requested fields return as structured JSON through devctx or the get_dev_context MCP tool."></a>
+          <figcaption><span>A point-in-time snapshot, not continuous monitoring.</span><span>Environment checks report names and presence, never values.</span></figcaption>
+        </figure>
+        <ul class="collectors">
+          <li><strong>services</strong>Known listening ports and Docker container information.</li>
+          <li><strong>git</strong>Branch, worktree status, upstream ahead/behind counts, and recent commit information.</li>
+          <li><strong>deploy</strong>Railway project context and DigitalOcean droplets, where configuration and CLI tools are available.</li>
+          <li><strong>env</strong>Names of expected variables that are set or missing. Variable values are not returned.</li>
+          <li><strong>hints</strong>Prioritized heuristics derived from collected signals. Review them in the context of your project.</li>
+        </ul>
+      </section>
+      <section id="identity" aria-labelledby="identity-title">
+        <div class="section-heading"><span class="number">03</span><h2 id="identity-title">Clarity, by design.</h2><p>Field-guide precision: pale mint, deep forest, lime highlights, and measured monospace details.</p></div>
+        <div class="palette" role="group" aria-label="Brand color palette">
+          <div class="swatch"><strong>Mint</strong><span>#EDF3EB</span></div>
+          <div class="swatch forest"><strong>Forest</strong><span>#153C35</span></div>
+          <div class="swatch lime"><strong>Lime</strong><span>#D4EF76</span></div>
+          <div class="swatch sage"><strong>Sage</strong><span>#526B5D</span></div>
+        </div>
+        <p class="note">The generated hero and diagrams are conceptual illustrations. They contain no captured machine state and make no measured speed or token-savings claims. See the <a href="BRAND.md">brand and rendering guide</a> for asset sources and editing instructions.</p>
+      </section>
+    </main>
+    <footer><span>devctx by DevvGwardo · Context for AI agents</span><span><a href="../README.md">Install &amp; use</a> · <a href="../LICENSE">MIT license</a></span></footer>
+  </div>
+</body>
+</html>

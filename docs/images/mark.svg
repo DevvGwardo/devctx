@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">devctx context packet mark</title>
+  <path fill="none" stroke="#153c35" stroke-width="4" d="M24 8H8v16m32-16h16v16M8 40v16h16m16 0h16V40M16 32h32M32 16v32"/>
+  <path fill="#d4ef76" stroke="#153c35" stroke-width="3" d="M24 24h16v16H24z"/>
+</svg>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>devctx · Context first. Better decisions.</title>
+  <link rel="stylesheet" href="brand.css">
+  <style>
+    html, body { width: 1600px; height: 800px; }
+    .banner { position: relative; width: 1600px; height: 800px; overflow: hidden; padding: 44px 60px; }
+    .masthead { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--forest); padding-bottom: 26px; }
+    .signature { display: flex; align-items: center; gap: 18px; }
+    .signature img { width: 38px; height: 38px; }
+    .label { font-size: 14px; }
+    .edition { color: var(--sage); }
+    .copy { position: relative; z-index: 1; padding-top: 36px; width: 790px; }
+    h1 { font-family: var(--mono); font-size: 145px; line-height: 1; font-weight: 700; letter-spacing: -9px; margin: 0 0 30px; }
+    .tagline { font-size: 67px; line-height: 1.08; letter-spacing: -3px; font-weight: 500; margin: 0; }
+    .tagline span { display: inline; background: var(--lime); box-shadow: 8px 0 var(--lime), -2px 0 var(--lime); }
+    .description { color: var(--sage); font-size: 23px; line-height: 1.65; margin: 28px 0 0; }
+    .art { position: absolute; right: 36px; top: 164px; width: 735px; height: 480px; object-fit: cover; mix-blend-mode: multiply; }
+    .art-caption { position: absolute; right: 64px; top: 653px; color: var(--sage); font-size: 11px; margin: 0; }
+    .footer { position: absolute; left: 60px; right: 60px; bottom: 36px; padding-top: 22px; border-top: 1px solid var(--forest); display: flex; justify-content: space-between; align-items: center; }
+    .fields { display: flex; gap: 0; font-family: var(--mono); font-size: 17px; }
+    .fields span + span::before { content: " / "; padding: 0 14px; color: var(--sage); }
+    .footer .label { font-size: 12px; color: var(--sage); }
+  </style>
+</head>
+<body>
+  <main class="banner" aria-label="devctx, a development environment snapshot for AI agents">
+    <header class="masthead">
+      <div class="signature"><img src="images/mark.svg" alt=""><span class="label">Development context / Ready for agents</span></div>
+      <span class="label edition">CLI + MCP · Structured JSON</span>
+    </header>
+    <div class="copy">
+      <h1>devctx</h1>
+      <p class="tagline">Context first.<br><span>Better decisions.</span></p>
+      <p class="description">One snapshot of your development environment.<br>Local signals, structured for AI agents.</p>
+    </div>
+    <img class="art" src="images/context-hero.webp" alt="Four instrument-like modules feeding one ordered context packet">
+    <p class="label art-caption">Concept illustration / Not a live environment snapshot</p>
+    <footer class="footer">
+      <div class="fields"><span>services</span><span>git</span><span>deploy</span><span>env</span><span>hints</span></div>
+      <span class="label">One call to get oriented.</span>
+    </footer>
+  </main>
+</body>
+</html>
