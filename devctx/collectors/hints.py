@@ -23,8 +23,12 @@ def generate_hints(
 
     for repo, state in git.items():
         if repo == "_summary":
+            if state.get("unknown", 0):
+                priority_hints.append((0, f"{state['unknown']} additional repo(s) have unknown worktree status"))
             continue
         branch = state.get("branch", "unknown")
+        if state.get("status_error"):
+            priority_hints.append((0, f"{repo} worktree status is unknown — {state['status_error']}"))
         if state.get("behind", 0) > 0:
             priority_hints.append((1, f"{repo} is {state['behind']} commit(s) behind upstream on {branch}"))
         if state.get("ahead", 0) > 0:

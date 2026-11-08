@@ -39,7 +39,7 @@ def _get_pid_on_port(port: int) -> int | None:
         )
         if result.returncode == 0 and result.stdout.strip():
             return int(result.stdout.strip().split("\n")[0])
-    except (subprocess.TimeoutExpired, ValueError):
+    except (subprocess.TimeoutExpired, ValueError, OSError):
         pass
     return None
 

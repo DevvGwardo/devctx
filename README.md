@@ -194,6 +194,17 @@ Review the hints before acting, and verify task-specific assumptions.
 When hints are requested, all source collectors run even if their sections are
 omitted from the response. The returned fields still follow the requested scope.
 
+PID lookup is optional: missing or inaccessible `lsof` leaves a detected listening port
+in the snapshot without a `pid`.
+
+Every Git repository entry includes its canonical absolute `path`. Unique ordinary
+repository names remain the JSON keys; duplicate basenames (and the reserved `_summary`
+name) use canonical paths instead. Repeated paths and symlink aliases are collected once.
+If `git status` fails or times out, `dirty` is `null`, `status_error` explains the unknown
+state, and no `changed_files` count is claimed. Hints surface that uncertainty. When more
+than ten repositories are summarized, `_summary.unknown` counts unknown worktree states
+separately from `_summary.dirty`.
+
 ### Adding collectors
 
 Add a file in `devctx/collectors/`, implement a `collect_*()` function that
